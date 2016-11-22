@@ -41,4 +41,4 @@ fi
 
 cd $root_path
 # Go!
-./node_modules/.bin/lerna publish --independent "$@"
+./node_modules/.bin/lerna publish --independent --repo-version 0.0.5 --skip-git --yes "$@"
