@@ -189,6 +189,7 @@ module.exports = {
         // @remove-on-eject-begin
         options: {
           babelrc: false,
+          plugins: ['relay'],
           presets: [require.resolve('babel-preset-react-app')],
         },
         // @remove-on-eject-end
