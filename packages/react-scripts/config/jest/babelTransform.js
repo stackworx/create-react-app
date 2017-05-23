@@ -10,6 +10,7 @@
 const babelJest = require('babel-jest');
 
 module.exports = babelJest.createTransformer({
+  plugins: ['relay'],
   presets: [require.resolve('babel-preset-react-app')],
   babelrc: false,
 });
