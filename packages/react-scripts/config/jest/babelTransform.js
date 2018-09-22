@@ -10,6 +10,7 @@
 const babelJest = require('babel-jest');
 
 module.exports = babelJest.createTransformer({
-  presets: [require.resolve('babel-preset-react-app')],
+  plugins: ['emotion', ['relay', { artifactDirectory: './src/__generated__' }]],
+  presets: ['@babel/typescript', require.resolve('babel-preset-react-app')],
   babelrc: false,
 });

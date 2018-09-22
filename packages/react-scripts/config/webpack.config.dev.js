@@ -21,6 +21,8 @@ const getClientEnvironment = require('./env');
 const paths = require('./paths');
 const ManifestPlugin = require('webpack-manifest-plugin');
 const getCacheIdentifier = require('react-dev-utils/getCacheIdentifier');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 
 // Webpack uses `publicPath` to determine where the app is being served from.
 // In development, we always serve from the root. This makes config easier.
@@ -143,7 +145,17 @@ module.exports = {
     // https://github.com/facebook/create-react-app/issues/290
     // `web` extension prefixes have been added for better support
     // for React Native Web.
-    extensions: ['.web.js', '.js', '.json', '.web.jsx', '.jsx'],
+    extensions: [
+      '.web.ts',
+      '.ts',
+      '.web.tsx',
+      '.tsx',
+      '.web.js',
+      '.js',
+      '.json',
+      '.web.jsx',
+      '.jsx',
+    ],
     alias: {
       // @remove-on-eject-begin
       // Resolve Babel runtime relative to react-scripts.
@@ -165,6 +177,7 @@ module.exports = {
       // please link the files into your node_modules/ and let module-resolution kick in.
       // Make sure your source files are compiled, as they will not be processed in any way.
       new ModuleScopePlugin(paths.appSrc, [paths.appPackageJson]),
+      new TsconfigPathsPlugin({ configFile: paths.appTsConfig }),
     ],
   },
   module: {
@@ -216,7 +229,7 @@ module.exports = {
           // Process application JS with Babel.
           // The preset includes JSX, Flow, and some ESnext features.
           {
-            test: /\.(js|jsx)$/,
+            test: /\.(js|jsx|ts|tsx)$/,
             include: paths.appSrc,
             use: [
               // This loader parallelizes code compilation, it is optional but
@@ -232,7 +245,10 @@ module.exports = {
                 options: {
                   // @remove-on-eject-begin
                   babelrc: false,
-                  presets: [require.resolve('babel-preset-react-app')],
+                  presets: [
+                    '@babel/typescript',
+                    require.resolve('babel-preset-react-app'),
+                  ],
                   // Make sure we have a unique cache identifier, erring on the
                   // side of caution.
                   // We remove this when the user ejects because the default
@@ -246,6 +262,8 @@ module.exports = {
                   ]),
                   // @remove-on-eject-end
                   plugins: [
+                    ['emotion', { sourceMap: true, autoLabel: true }],
+                    ['relay', { artifactDirectory: './src/__generated__' }],
                     [
                       require.resolve('babel-plugin-named-asset-import'),
                       {
@@ -416,6 +434,11 @@ module.exports = {
     new ManifestPlugin({
       fileName: 'asset-manifest.json',
       publicPath: publicPath,
+    }),
+    new ForkTsCheckerWebpackPlugin({
+      async: false,
+      watch: paths.appSrc,
+      tsconfig: paths.appTsConfig,
     }),
   ],
 
