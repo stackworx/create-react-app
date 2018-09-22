@@ -21,12 +21,12 @@ module.exports = (resolve, rootDir, isEjecting) => {
   // TODO: I don't know if it's safe or not to just use / as path separator
   // in Jest configs. We need help from somebody with Windows to determine this.
   const config = {
-    collectCoverageFrom: ['src/**/*.{js,jsx}'],
+    collectCoverageFrom: ['src/**/*.{js,jsx,ts,tsx}'],
     setupFiles: [resolve('config/polyfills.js')],
     setupTestFrameworkScriptFile: setupTestsFile,
     testMatch: [
-      '<rootDir>/src/**/__tests__/**/*.{js,jsx}',
-      '<rootDir>/src/**/?(*.)(spec|test).{js,jsx}',
+      '<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}',
+      '<rootDir>/src/**/?(*.)(spec|test).{js,jsx,ts,tsx}',
     ],
     testEnvironment: 'node',
     testURL: 'http://localhost',
@@ -34,6 +34,7 @@ module.exports = (resolve, rootDir, isEjecting) => {
       '^.+\\.(js|jsx)$': isEjecting
         ? '<rootDir>/node_modules/babel-jest'
         : resolve('config/jest/babelTransform.js'),
+      '^.+\\.tsx?$': resolve('config/jest/typescriptTransform.js'),
       '^.+\\.css$': resolve('config/jest/cssTransform.js'),
       '^.+\\.(graphql)$': resolve('config/jest/graphqlTransform.js'),
       '^(?!.*\\.(js|jsx|css|json|graphql)$)': resolve(
@@ -41,14 +42,30 @@ module.exports = (resolve, rootDir, isEjecting) => {
       ),
     },
     transformIgnorePatterns: [
-      '[/\\\\]node_modules[/\\\\].+\\.(js|jsx)$',
+      '[/\\\\]node_modules[/\\\\].+\\.(js|jsx|ts|tsx)$',
       '^.+\\.module\\.(css|sass|scss)$',
     ],
     moduleNameMapper: {
       '^react-native$': 'react-native-web',
       '^.+\\.module\\.(css|sass|scss)$': 'identity-obj-proxy',
     },
-    moduleFileExtensions: ['web.js', 'js', 'json', 'web.jsx', 'jsx', 'node'],
+    moduleFileExtensions: [
+      'web.ts',
+      'ts',
+      'web.tsx',
+      'tsx',
+      'web.js',
+      'js',
+      'json',
+      'web.jsx',
+      'jsx',
+      'node',
+    ],
+    globals: {
+      'ts-jest': {
+        tsConfigFile: paths.appTsTestConfig,
+      },
+    },
   };
   if (rootDir) {
     config.rootDir = rootDir;

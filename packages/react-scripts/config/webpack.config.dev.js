@@ -21,6 +21,8 @@ const getClientEnvironment = require('./env');
 const paths = require('./paths');
 const ManifestPlugin = require('webpack-manifest-plugin');
 const getCacheIdentifier = require('react-dev-utils/getCacheIdentifier');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 
 // Webpack uses `publicPath` to determine where the app is being served from.
 // In development, we always serve from the root. This makes config easier.
@@ -143,7 +145,17 @@ module.exports = {
     // https://github.com/facebook/create-react-app/issues/290
     // `web` extension prefixes have been added for better support
     // for React Native Web.
-    extensions: ['.web.js', '.js', '.json', '.web.jsx', '.jsx'],
+    extensions: [
+      '.web.ts',
+      '.ts',
+      '.web.tsx',
+      '.tsx',
+      '.web.js',
+      '.js',
+      '.json',
+      '.web.jsx',
+      '.jsx',
+    ],
     alias: {
       // @remove-on-eject-begin
       // Resolve Babel runtime relative to react-scripts.
@@ -165,6 +177,7 @@ module.exports = {
       // please link the files into your node_modules/ and let module-resolution kick in.
       // Make sure your source files are compiled, as they will not be processed in any way.
       new ModuleScopePlugin(paths.appSrc, [paths.appPackageJson]),
+      new TsconfigPathsPlugin({ configFile: paths.appTsConfig }),
     ],
   },
   module: {
@@ -232,6 +245,7 @@ module.exports = {
                 options: {
                   // @remove-on-eject-begin
                   babelrc: false,
+                  plugins: ['relay'],
                   presets: [require.resolve('babel-preset-react-app')],
                   // Make sure we have a unique cache identifier, erring on the
                   // side of caution.
@@ -265,6 +279,20 @@ module.exports = {
                   // Don't waste time on Gzipping the cache
                   cacheCompression: false,
                   highlightCode: true,
+                },
+              },
+            ],
+          },
+          // Compile .tsx?
+          {
+            test: /\.(ts|tsx)$/,
+            include: paths.appSrc,
+            use: [
+              {
+                loader: require.resolve('ts-loader'),
+                options: {
+                  // disable type checker - we will use it in fork plugin
+                  transpileOnly: true,
                 },
               },
             ],
@@ -416,6 +444,11 @@ module.exports = {
     new ManifestPlugin({
       fileName: 'asset-manifest.json',
       publicPath: publicPath,
+    }),
+    new ForkTsCheckerWebpackPlugin({
+      async: false,
+      watch: paths.appSrc,
+      tsconfig: paths.appTsConfig,
     }),
   ],
 
