@@ -28,6 +28,8 @@ const ModuleNotFoundPlugin = require('react-dev-utils/ModuleNotFoundPlugin');
 // @remove-on-eject-begin
 const getCacheIdentifier = require('react-dev-utils/getCacheIdentifier');
 // @remove-on-eject-end
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 
 // Webpack uses `publicPath` to determine where the app is being served from.
 // It requires a trailing slash, or the file assets will get an incorrect path.
@@ -220,7 +222,17 @@ module.exports = {
     // https://github.com/facebook/create-react-app/issues/290
     // `web` extension prefixes have been added for better support
     // for React Native Web.
-    extensions: ['.mjs', '.web.js', '.js', '.json', '.web.jsx', '.jsx'],
+    extensions: [
+      '.web.ts',
+      '.ts',
+      '.web.tsx',
+      '.tsx',
+      '.web.js',
+      '.js',
+      '.json',
+      '.web.jsx',
+      '.jsx',
+    ],
     alias: {
       // Support React Native Web
       // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
@@ -236,6 +248,7 @@ module.exports = {
       // please link the files into your node_modules/ and let module-resolution kick in.
       // Make sure your source files are compiled, as they will not be processed in any way.
       new ModuleScopePlugin(paths.appSrc, [paths.appPackageJson]),
+      new TsconfigPathsPlugin({ configFile: paths.appTsProdConfig }),
     ],
   },
   resolveLoader: {
@@ -295,9 +308,8 @@ module.exports = {
           // Process application JS with Babel.
           // The preset includes JSX, Flow, and some ESnext features.
           {
-            test: /\.(js|mjs|jsx)$/,
+            test: /\.(js|mjs|jsx|ts|tsx)$/,
             include: paths.appSrc,
-
             loader: require.resolve('babel-loader'),
             options: {
               customize: require.resolve(
@@ -306,7 +318,15 @@ module.exports = {
               // @remove-on-eject-begin
               babelrc: false,
               configFile: false,
-              presets: [require.resolve('babel-preset-react-app')],
+              presets: [
+                [
+                  require.resolve('babel-preset-react-app'),
+                  {
+                    flow: false,
+                  },
+                ],
+                '@babel/preset-typescript',
+              ],
               // Make sure we have a unique cache identifier, erring on the
               // side of caution.
               // We remove this when the user ejects because the default
@@ -320,6 +340,8 @@ module.exports = {
               ]),
               // @remove-on-eject-end
               plugins: [
+                ['emotion', { hoist: true }],
+                ['relay'],
                 [
                   require.resolve('babel-plugin-named-asset-import'),
                   {
@@ -476,7 +498,8 @@ module.exports = {
     }),
     // Inlines the webpack runtime script. This script is too small to warrant
     // a network request.
-    shouldInlineRuntimeChunk && new InlineChunkHtmlPlugin(HtmlWebpackPlugin, [/runtime~.+[.]js/]),
+    shouldInlineRuntimeChunk &&
+      new InlineChunkHtmlPlugin(HtmlWebpackPlugin, [/runtime~.+[.]js/]),
     // Makes some environment variables available in index.html.
     // The public URL is available as %PUBLIC_URL% in index.html, e.g.:
     // <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico">
@@ -524,6 +547,11 @@ module.exports = {
         // public/ and not a SPA route
         new RegExp('/[^/]+\\.[^/]+$'),
       ],
+    }),
+    new ForkTsCheckerWebpackPlugin({
+      async: false,
+      tsconfig: paths.appTsConfig,
+      tslint: paths.appTsLint,
     }),
   ].filter(Boolean),
   // Some libraries import Node modules but don't use them in the browser.
