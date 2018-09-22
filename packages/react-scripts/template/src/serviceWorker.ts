@@ -1,3 +1,4 @@
+// tslint:disable:no-console
 // In production, we register a service worker to serve assets from local cache.
 
 // This lets the app load faster on subsequent visits in production, and gives
@@ -18,10 +19,13 @@ const isLocalhost = Boolean(
     )
 );
 
-export function register(config) {
+export function register(config: any) {
   if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
     // The URL constructor is available in all browsers that support SW.
-    const publicUrl = new URL(process.env.PUBLIC_URL, window.location);
+    const publicUrl = new URL(
+      process.env.PUBLIC_URL!,
+      window.location.toString()
+    );
     if (publicUrl.origin !== window.location.origin) {
       // Our service worker won't work if PUBLIC_URL is on a different origin
       // from what our page is served on. This might happen if a CDN is used to
@@ -52,14 +56,14 @@ export function register(config) {
   }
 }
 
-function registerValidSW(swUrl, config) {
+function registerValidSW(swUrl: string, config: any) {
   navigator.serviceWorker
     .register(swUrl)
     .then(registration => {
       registration.onupdatefound = () => {
         const installingWorker = registration.installing;
-        installingWorker.onstatechange = () => {
-          if (installingWorker.state === 'installed') {
+        installingWorker!.onstatechange = () => {
+          if (installingWorker!.state === 'installed') {
             if (navigator.serviceWorker.controller) {
               // At this point, the old content will have been purged and
               // the fresh content will have been added to the cache.
@@ -91,14 +95,14 @@ function registerValidSW(swUrl, config) {
     });
 }
 
-function checkValidServiceWorker(swUrl, config) {
+function checkValidServiceWorker(swUrl: string, config: any) {
   // Check if the service worker can be found. If it can't reload the page.
   fetch(swUrl)
     .then(response => {
       // Ensure service worker exists, and that we really are getting a JS file.
       if (
         response.status === 404 ||
-        response.headers.get('content-type').indexOf('javascript') === -1
+        response.headers.get('content-type')!.indexOf('javascript') === -1
       ) {
         // No service worker found. Probably a different app. Reload the page.
         navigator.serviceWorker.ready.then(registration => {
