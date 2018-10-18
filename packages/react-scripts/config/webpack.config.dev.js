@@ -265,8 +265,23 @@ module.exports = {
               ]),
               // @remove-on-eject-end
               plugins: [
-                ['emotion', { hoist: true }],
-                ['relay'],
+                (() => {
+                  try {
+                    return [
+                      require.reolve('babel-plugin-emotion'),
+                      { hoist: true },
+                    ];
+                  } catch (ex) {
+                    return null;
+                  }
+                })(),
+                (() => {
+                  try {
+                    return require.resolve('babel-plugin-relay');
+                  } catch (ex) {
+                    return null;
+                  }
+                })(),
                 [
                   require.resolve('babel-plugin-named-asset-import'),
                   {
@@ -277,7 +292,7 @@ module.exports = {
                     },
                   },
                 ],
-              ],
+              ].filter(Boolean),
               // This is a feature of `babel-loader` for webpack (not Babel itself).
               // It enables caching results in ./node_modules/.cache/babel-loader/
               // directory for faster rebuilds.

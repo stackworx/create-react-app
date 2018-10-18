@@ -10,7 +10,22 @@
 const babelJest = require('babel-jest');
 
 module.exports = babelJest.createTransformer({
-  plugins: ['emotion', ['relay']],
+  plugins: [
+    (() => {
+      try {
+        return [require.reolve('babel-plugin-emotion'), { hoist: true }];
+      } catch (ex) {
+        return null;
+      }
+    })(),
+    (() => {
+      try {
+        return require.resolve('babel-plugin-relay');
+      } catch (ex) {
+        return null;
+      }
+    })(),
+  ].filter(Boolean),
   presets: [
     [
       require.resolve('babel-preset-react-app'),
