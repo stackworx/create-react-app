@@ -11,6 +11,27 @@ const babelJest = require('babel-jest');
 
 module.exports = babelJest.createTransformer({
   plugins: [
+    // Required for legacy decorators (Mobx)
+    (() => {
+      try {
+        return [
+          require.reolve('@babel/plugin-proposal-decorators'),
+          { legacy: true },
+        ];
+      } catch (ex) {
+        return null;
+      }
+    })(),
+    (() => {
+      try {
+        return [
+          require.reolve('@babel/plugin-proposal-class-properties'),
+          { loose: true },
+        ];
+      } catch (ex) {
+        return null;
+      }
+    })(),
     (() => {
       try {
         return [require.reolve('babel-plugin-emotion'), { hoist: true }];

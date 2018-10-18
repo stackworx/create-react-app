@@ -340,6 +340,27 @@ module.exports = {
               ]),
               // @remove-on-eject-end
               plugins: [
+                // Required for legacy decorators (Mobx)
+                (() => {
+                  try {
+                    return [
+                      require.reolve('@babel/plugin-proposal-decorators'),
+                      { legacy: true },
+                    ];
+                  } catch (ex) {
+                    return null;
+                  }
+                })(),
+                (() => {
+                  try {
+                    return [
+                      require.reolve('@babel/plugin-proposal-class-properties'),
+                      { loose: true },
+                    ];
+                  } catch (ex) {
+                    return null;
+                  }
+                })(),
                 (() => {
                   try {
                     return [
